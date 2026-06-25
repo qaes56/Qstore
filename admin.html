@@ -236,7 +236,7 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const db = getAuth ? getFirestore(app) : null;
+  const db = getFirestore(app);
   const auth = getAuth(app);
 
   const CAT_LABELS = {design:"تصميم وإبداع", ai:"ذكاء اصطناعي", productivity:"إنتاجية", "3d":"3D وبرمجة", entertainment:"ترفيه", social:"تواصل اجتماعي"};
@@ -265,7 +265,16 @@
     try{
       await signInWithEmailAndPassword(auth, email, pass);
     }catch(err){
-      loginError.textContent = "بيانات الدخول غير صحيحة.";
+      // رسائل خطأ واضحة
+      if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password'){
+        loginError.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+      } else if(err.code === 'auth/too-many-requests'){
+        loginError.textContent = "تم تعطيل الحساب مؤقتاً بسبب محاولات كثيرة. انتظر قليلاً.";
+      } else if(err.code === 'auth/network-request-failed'){
+        loginError.textContent = "تحقق من اتصالك بالإنترنت.";
+      } else {
+        loginError.textContent = "خطأ: " + err.code;
+      }
     }
   });
   document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') loginBtn.click(); });
