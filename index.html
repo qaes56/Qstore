@@ -892,6 +892,63 @@
     entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
   }, {threshold:0.12});
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// ========================================================
+// --- كود جلب منتجات الفايربيس (Firestore) وتحديث الموقع ---
+// ========================================================
+(function() {
+    const fbAppScript = document.createElement('script');
+    fbAppScript.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js";
+    document.head.appendChild(fbAppScript);
+
+    fbAppScript.onload = () => {
+        const fbFirestoreScript = document.createElement('script');
+        fbFirestoreScript.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js";
+        document.head.appendChild(fbFirestoreScript);
+
+        fbFirestoreScript.onload = () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyC_MLXtjOPOxOTGKLYE0zxRiPSoNT5p1Kc",
+              authDomain: "qstore-d2fb4.firebaseapp.com",
+              projectId: "qstore-d2fb4",
+              storageBucket: "qstore-d2fb4.firebasestorage.app",
+              messagingSenderId: "269555067998",
+              appId: "1:269555067998:web:2fe1d81ab8aa6170ee98cf",
+              measurementId: "G-VS61EHPQX7"
+            };
+
+            if (!window.firebase.apps.length) {
+                window.firebase.initializeApp(firebaseConfig);
+            }
+            const db = window.firebase.firestore();
+
+            db.collection("products").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    products.push({
+                        id: doc.id,
+                        name: data.name, 
+                        priceAmount: parseFloat(data.price) || 0, 
+                        image: data.image || "", 
+                        cat: "all",
+                        desc: { 
+                            ar: "منتج متوفر الآن في المتجر ومتاح للطلب الفوري", 
+                            en: "Product available now for instant order", 
+                            ku: "ئێستا لە فرۆشگا بەردەستە بۆ داواکاری دەستبەجێ" 
+                        }
+                    });
+                }); // 👈 هذا القوس يقفل الـ forEach الصحيح
+
+                if (typeof renderProducts === "function") {
+                    renderProducts(currentCat);
+                }
+            }).catch((error) => {
+                console.error("خطأ أثناء جلب المنتجات:", error);
+            });
+        };
+    };
+})();
+
 </script>
 </body>
 </html>
